@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dark Sky Project Tour Finder</title>
+<style>
+:root{--bg:#06101d;--panel:#0d1b2a;--panel2:#12263a;--text:#f7fbff;--muted:#a9bdd0;--accent:#83cfff;--border:#27475f;--warn:#ffe6a8}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;padding:18px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif;background:radial-gradient(circle at top,#17395e 0,#07111f 45%,#030812 100%);color:var(--text)}
+.app{width:min(780px,100%);margin:auto}.hero{padding:10px 2px 18px}.badge{display:inline-block;border:1px solid var(--border);border-radius:999px;padding:7px 10px;color:var(--accent);font-size:13px}
+h1{font-size:30px;margin:10px 0 6px}.lead,.muted{color:var(--muted);line-height:1.7}.lead{margin:0}
+.card{background:rgba(13,27,42,.95);border:1px solid var(--border);border-radius:22px;padding:22px;margin-bottom:14px}
+.topline{display:flex;justify-content:space-between;color:var(--muted);font-size:13px}.progress{height:9px;background:#091725;border:1px solid #1d3448;border-radius:999px;overflow:hidden;margin:12px 0 24px}.bar{height:100%;background:var(--accent);transition:.2s}
+.question{font-size:23px;line-height:1.5;margin:0 0 10px}.hint{color:var(--muted);line-height:1.7;margin:0 0 22px}.buttons{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+button{border:1px solid var(--border);border-radius:16px;padding:16px 18px;font-size:18px;font-weight:700;cursor:pointer;background:var(--panel2);color:var(--text)}button:hover{border-color:var(--accent)}.yes{background:var(--accent);color:#06111d;border-color:var(--accent)}
+.result{display:none}.resultBox{border:1px solid var(--accent);border-radius:18px;padding:18px;background:rgba(20,55,80,.45)}.resultBox h2{font-size:29px;margin:7px 0 8px}
+.list{padding-left:20px;line-height:1.9}.common{margin-top:16px}.commonGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.info{border:1px solid var(--border);border-radius:14px;padding:13px;background:#0a1724}.info strong{display:block;color:var(--accent);margin-bottom:4px}
+.warning{margin-top:14px;padding:14px;border-radius:14px;border:1px solid #7c6330;background:rgba(124,99,48,.18);color:var(--warn);line-height:1.75}
+.alt{margin-top:14px;border:1px solid var(--border);border-radius:16px;padding:15px;background:#0a1724}.alt h3{margin:0 0 6px}.restart{width:100%;margin-top:18px}
+.photoOptions{display:grid;gap:10px;margin-top:16px}.photoOption{border:1px solid var(--border);border-radius:14px;padding:13px;background:#0a1724}.photoOption strong{display:block;margin-bottom:4px}
+.note{font-size:13px;color:var(--muted);line-height:1.65;margin-top:14px}
+@media(max-width:520px){body{padding:12px}.card{padding:18px}h1{font-size:25px}.question{font-size:21px}.commonGrid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<main class="app">
+<section class="hero">
+<span class="badge">Dark Sky Project • Tour Finder</span>
+<h1>あなたに合う星空ツアーは？</h1>
+<p class="lead">いくつかのYES / NOに答えて、Summit ExperienceとCrater Experienceのどちらがあなたに合うかチェックしてみましょう。</p>
+</section>
+
+<section class="card">
+<div class="topline"><span id="step">Question 1</span><span id="count">1 / 7</span></div>
+<div class="progress"><div class="bar" id="bar" style="width:14.3%"></div></div>
+
+<div id="questions">
+<h2 class="question" id="q"></h2>
+<p class="hint" id="hint"></p>
+<div class="buttons"><button class="yes" id="yes">YES</button><button id="no">NO</button></div>
+</div>
+
+<div class="result" id="result">
+<div class="resultBox">
+<span class="badge" id="resultBadge">RECOMMENDED</span>
+<h2 id="resultName"></h2>
+<p class="muted" id="summary"></p>
+<ul class="list" id="reasons"></ul>
+<div class="warning" id="warning" style="display:none"></div>
+</div>
+
+<div class="common" id="common">
+<h3>どちらのツアーでも楽しめること</h3>
+<div class="commonGrid">
+<div class="info"><strong>Experienced Guides</strong>経験豊富なガイドによる星空と宇宙の案内</div>
+<div class="info"><strong>Telescope Observation</strong>専門的な望遠鏡を使った天体観測</div>
+<div class="info"><strong>Observatory Experience</strong>天文台での星空観測</div>
+<div class="info"><strong>Your Own Photography</strong>お客様自身のスマートフォンやカメラで撮影可能</div>
+</div>
+</div>
+
+<div class="alt" id="alt" style="display:none"><h3 id="altName"></h3><p class="muted" id="altText"></p></div>
+<div class="photoOptions" id="photoOptions" style="display:none">
+<div class="photoOption"><strong>Blue Star Tekapo</strong>写真撮影そのものを特に重視したい方の候補。</div>
+<div class="photoOption"><strong>Chameleon Stargazing</strong>星空写真を含む体験を重視したい方の候補。</div>
+<div class="photoOption"><strong>Astro Tekapo</strong>少人数と星空写真を重視したい方の候補。</div>
+</div>
+<p class="note">※この診断はツアー選びの目安です。参加条件や必要なサポートについては、予約前にDark Sky Projectへご確認ください。</p>
+<button class="restart" id="restart">もう一度診断する</button>
+</div>
+</section>
+</main>
+
+<script>
+const qs=[
+{key:"photo",q:"星空について学んだり望遠鏡で観測することより、とにかく「星空写真を撮ること」が一番の目的ですか？",hint:"Dark Sky Projectは写真撮影ツアーではなく、星空と宇宙をご案内するガイディングツアーです。"},
+{key:"child",q:"9歳以下のお子さまと参加しますか？",hint:"年齢はSummit ExperienceとCrater Experienceを選ぶ重要な条件です。"},
+{key:"wheelchair",q:"車椅子での参加を希望しますか？",hint:"アクセシビリティの条件から適したツアーをご案内します。"},
+{key:"hearing",q:"耳の不自由な方が参加しますか？",hint:"安全上の参加条件が異なるため、適したツアーをご案内します。"},
+{key:"mobility",q:"数百メートルの歩行や山頂までの移動に不安がありますか？",hint:"Summit Experienceでは駐車場から山頂まで歩行があります。"},
+{key:"mtjohn",q:"現役の天文台の敷地内で星空観測をしてみたいですか？",hint:"Mt John Observatoryならではの大きな魅力です。"},
+{key:"weather",q:"風や寒さの影響が比較的少なく、コンパクトに楽しめる方を重視しますか？",hint:"Craterの地形は風や街明かりの影響を抑えやすく、移動も少ないのが特徴です。"}
+];
+let i=0,a={};
+const $=id=>document.getElementById(id);
+function render(){let x=qs[i];$("q").textContent=x.q;$("hint").textContent=x.hint;$("step").textContent=`Question ${i+1}`;$("count").textContent=`${i+1} / ${qs.length}`;$("bar").style.width=`${(i+1)/qs.length*100}%`}
+function answer(v){
+ let key=qs[i].key;a[key]=v;
+ if(key==="photo"&&v){photoResult();return}
+ i++; if(i>=qs.length) dspResult(); else render()
+}
+function finish(){
+ $("questions").style.display="none";$("result").style.display="block";$("step").textContent="Complete";$("count").textContent="";$("bar").style.width="100%"
+}
+function photoResult(){
+ finish();$("resultBadge").textContent="PHOTO-FIRST";$("resultName").textContent="写真撮影を主目的としたツアーもご検討ください";
+ $("summary").textContent="Dark Sky Projectは、経験豊富なガイドによる星空・宇宙の案内と望遠鏡観測を中心としたガイディングツアーです。写真撮影そのものが旅の最優先目的なら、フォト体験を強みにしたツアーの方が合う可能性があります。";
+ $("reasons").innerHTML="<li>Dark Sky Projectでもお客様自身で写真撮影は可能です</li><li>ただしツアーの中心は星空・宇宙のガイディングと天体観測です</li>";
+ $("common").style.display="none";$("photoOptions").style.display="grid";$("alt").style.display="none"
+}
+function dspResult(){
+ let s=0,c=0,rs=[],rc=[],notes=[];
+ if(a.child){c+=20;s-=20;rc.push("5歳以上のお子さまを含む家族旅行に適している");notes.push("Summit Experienceは9歳以下のお子さまは安全上参加できません。Crater Experienceは5歳以上から参加可能です。")}
+ if(a.wheelchair){c+=25;s-=25;rc.push("車椅子での参加について相談可能");notes.push("Summit Experienceは安全上、車椅子での参加ができません。Crater Experienceは事前相談のうえ参加を検討できます。")}
+ if(a.hearing){c+=25;s-=25;rc.push("耳の不自由な方の参加について相談可能");notes.push("Summit Experienceは安全上、耳の不自由な方の参加ができません。Crater Experienceは事前相談が可能です。")}
+ if(a.mobility){c+=12;s-=10;rc.push("移動がほとんどなく、身体的な負担を抑えやすい")}
+ else{s+=2}
+ if(a.mtjohn){s+=12;rs.push("現役のMt John Observatoryの敷地内で観測できる");rs.push("山頂から広い星空を楽しめる");rs.push("最大16インチ口径の望遠鏡で観測できる")}
+ else c+=2;
+ if(a.weather){c+=8;rc.push("クレーター形状が風や街明かりの影響を抑えてくれる");rc.push("街から近く、移動が少なくコンパクト")}
+ else{s+=3;rs.push("山頂ならではの開放的な星空を重視")}
+ let summit=s>=c, name=summit?"Summit Experience":"Crater Experience";
+ finish();$("resultBadge").textContent="RECOMMENDED";$("resultName").textContent=name;
+ $("summary").textContent=summit?
+ "現役のMt John Observatoryという特別な場所で、広い星空と本格的な望遠鏡観測を楽しみたい方におすすめです。":
+ "街から近いクレーター形状の天文台で、本格的な星空観測をよりアクセスしやすく、コンパクトに楽しみたい方におすすめです。";
+ let base=summit?rs:rc;
+ $("reasons").innerHTML=[...new Set(base)].slice(0,5).map(x=>`<li>${x}</li>`).join("");
+ $("common").style.display="block";$("photoOptions").style.display="none";$("alt").style.display="block";
+ $("altName").textContent=summit?"もう一つの選択肢：Crater Experience":"もう一つの選択肢：Summit Experience";
+ $("altText").textContent=summit?
+ "風や寒さの影響、山道での移動、歩行距離などが気になる場合は、よりアクセスしやすいCrater Experienceもご検討ください。":
+ "現役のMt John Observatory、より広い視界、最大16インチ口径の望遠鏡などを重視する場合はSummit Experienceがおすすめです。";
+ if(summit)notes.push("Summit Experienceは風・寒さなど山頂の気象条件の影響を受けやすく、バスで山道を片道約15分移動し、駐車場から山頂まで数百メートル歩きます。");
+ else notes.push("Crater Experienceは現役の観測施設ではなく、ツアー時間が短めです。またクレーター形状のため低い高度の星は一部見えにくくなります。");
+ $("warning").style.display="block";$("warning").innerHTML="<strong>事前に知っておきたいこと</strong><br>"+notes.join("<br>")
+}
+$("yes").onclick=()=>answer(true);$("no").onclick=()=>answer(false);
+$("restart").onclick=()=>{i=0;a={};$("result").style.display="none";$("questions").style.display="block";$("common").style.display="block";$("photoOptions").style.display="none";$("warning").style.display="none";render()};
+render();
+</script>
+</body>
+</html>
