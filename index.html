@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tekapo Stargazing Tour Finder</title>
+<style>
+:root{
+  --bg:#06101d;--panel:#0d1b2a;--panel2:#12263a;--text:#f7fbff;
+  --muted:#a9bdd0;--accent:#83cfff;--border:#27475f;--warn:#ffe6a8
+}
+*{box-sizing:border-box}
+body{
+  margin:0;min-height:100vh;padding:18px;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif;
+  background:radial-gradient(circle at top,#17395e 0,#07111f 45%,#030812 100%);
+  color:var(--text)
+}
+.app{width:min(780px,100%);margin:auto}
+.hero{padding:12px 2px 20px}
+.badge{display:inline-block;border:1px solid var(--border);border-radius:999px;padding:7px 10px;color:var(--accent);font-size:13px}
+h1{font-size:31px;margin:11px 0 8px}
+.lead,.muted{color:var(--muted);line-height:1.75}.lead{margin:0}
+.card{background:rgba(13,27,42,.95);border:1px solid var(--border);border-radius:22px;padding:22px}
+.topline{display:flex;justify-content:space-between;color:var(--muted);font-size:13px}
+.progress{height:9px;background:#091725;border:1px solid #1d3448;border-radius:999px;overflow:hidden;margin:12px 0 24px}
+.bar{height:100%;background:var(--accent);transition:.2s}
+.question{font-size:23px;line-height:1.5;margin:0 0 10px}
+.hint{color:var(--muted);line-height:1.7;margin:0 0 22px}
+.buttons{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+button{border:1px solid var(--border);border-radius:16px;padding:16px 18px;font-size:18px;font-weight:700;cursor:pointer;background:var(--panel2);color:var(--text)}
+button:hover{border-color:var(--accent)}
+.yes{background:var(--accent);color:#06111d;border-color:var(--accent)}
+.result{display:none}
+.winner{border:1px solid var(--accent);border-radius:18px;padding:19px;background:rgba(20,55,80,.45)}
+.winner h2{font-size:29px;margin:7px 0}
+.list{padding-left:20px;line-height:1.9}
+.common{margin-top:16px}
+.commonGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.info,.alt{border:1px solid var(--border);border-radius:14px;padding:13px;background:#0a1724}
+.info strong{display:block;color:var(--accent);margin-bottom:4px}
+.philosophy{
+  margin-top:16px;padding:16px;border-radius:16px;
+  border:1px solid var(--accent);background:rgba(20,55,80,.28);
+  line-height:1.8
+}
+.philosophy strong{display:block;margin-bottom:5px;color:var(--accent)}
+.warning{margin-top:14px;padding:14px;border-radius:14px;border:1px solid #7c6330;background:rgba(124,99,48,.18);color:var(--warn);line-height:1.75}
+.alts{display:grid;gap:10px;margin-top:15px}
+.alt strong{display:block;margin-bottom:4px}
+.alt span{color:var(--accent);font-weight:700}
+.restart{width:100%;margin-top:18px}
+.note{font-size:13px;color:var(--muted);line-height:1.65;margin-top:14px}
+@media(max-width:520px){
+  body{padding:12px}.card{padding:18px}h1{font-size:25px}
+  .question{font-size:21px}.commonGrid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<main class="app">
+<section class="hero">
+<span class="badge">YES / NOで約1分</span>
+<h1>あなたに合うテカポの星空ツアーは？</h1>
+<p class="lead">
+テカポには、それぞれ違った魅力を持つ星空ツアーがあります。
+いくつかの簡単な質問に答えて、あなたの旅のスタイルに合った星空体験を見つけてみましょう。
+</p>
+</section>
+
+<section class="card">
+<div class="topline"><span id="step">Question 1</span><span id="count"></span></div>
+<div class="progress"><div class="bar" id="bar"></div></div>
+
+<div id="questionArea">
+  <h2 class="question" id="q"></h2>
+  <p class="hint" id="hint"></p>
+  <div class="buttons">
+    <button class="yes" id="yes">YES</button>
+    <button id="no">NO</button>
+  </div>
+</div>
+
+<div class="result" id="result">
+  <div class="winner">
+    <span class="badge">BEST MATCH</span>
+    <h2 id="winnerName"></h2>
+    <p class="muted" id="summary"></p>
+    <ul class="list" id="reasons"></ul>
+    <div class="warning" id="warning" style="display:none"></div>
+  </div>
+
+  <div class="common" id="dspCommon" style="display:none">
+    <h3>Dark Sky Projectのガイディングツアー</h3>
+    <div class="commonGrid">
+      <div class="info"><strong>Experienced Guides</strong>経験豊富なガイドによる星空と宇宙の案内</div>
+      <div class="info"><strong>Professional Telescopes</strong>専門的な望遠鏡を使用した観測</div>
+      <div class="info"><strong>Observatory</strong>天文台での星空観測</div>
+      <div class="info"><strong>Your Photography</strong>ご自身のスマートフォンやカメラで撮影可能</div>
+    </div>
+
+    <div class="philosophy">
+      <strong>More than just seeing the stars</strong>
+      Dark Sky Projectが大切にしているのは、星空を見るだけで終わらないこと。
+      ガイドと一緒に宇宙を知り、驚き、ワクワクし、ツアーのあとに少しでも宇宙を好きになってもらうことです。
+    </div>
+  </div>
+
+  <div class="alts" id="alts"></div>
+
+  <p class="note">
+    ※この診断はツアー選びの目安です。料金、開催条件、年齢制限、アクセシビリティなどは予約前に各ツアーへご確認ください。
+  </p>
+
+  <button class="restart" id="restart">もう一度診断する</button>
+</div>
+</section>
+</main>
+
+<script>
+const questions=[
+  {
+    key:"wonder",
+    q:"ただ星を見るだけでなく、宇宙のことを知ってワクワクする体験をしたいですか？",
+    hint:"ガイドの話を聞きながら、宇宙をより身近に感じたい場合はYES。"
+  },
+  {
+    key:"location",
+    q:"星空だけでなく、特別なロケーションで観測することも重視しますか？",
+    hint:"現役の天文台や、観測場所そのものの特別感を楽しみたい場合はYES。"
+  },
+  {
+    key:"small",
+    q:"できるだけ少人数のツアーを重視しますか？",
+    hint:"グループの小ささや、よりプライベート感のある雰囲気を優先する場合はYES。"
+  },
+  {
+    key:"telescope",
+    q:"大きな望遠鏡を使って、星や天体を実際に見てみたいですか？",
+    hint:"肉眼だけでなく、望遠鏡を通して宇宙をのぞいてみたい場合はYES。"
+  },
+  {
+    key:"guide",
+    q:"経験豊富なガイドから星空や宇宙についてしっかり聞きたいですか？",
+    hint:"ガイディングや天文学の解説を重視する場合はYES。"
+  },
+  {
+    key:"japanese",
+    q:"日本語で参加できることを重視しますか？",
+    hint:"日本語ツアーを希望する場合はYES。"
+  },
+  {
+    key:"english",
+    q:"ツアーが英語でも問題ありませんか？",
+    hint:"英語でのガイディングでも楽しめる場合はYES。日本語で参加したい場合はNO。"
+  },
+  {
+    key:"wheelchair",
+    q:"車椅子での参加を希望しますか？",
+    hint:"ツアーによって参加条件が異なるため、アクセシビリティを優先して診断します。"
+  },
+  {
+    key:"ownphoto",
+    q:"自分のスマートフォンやカメラでも星空を撮影したいですか？",
+    hint:"ご自身で撮影を楽しみたい場合はYES。"
+  },
+  {
+    key:"portrait",
+    q:"星空と一緒に自分の写真を撮ってもらうことを特に重視しますか？",
+    hint:"星空ポートレートや記念写真がツアー選びの大きな目的ならYES。"
+  },
+  {
+    key:"budget",
+    q:"ツアー内容やロケーションより、とにかく料金の安さを優先しますか？",
+    hint:"体験の違いよりも、できるだけ安く参加することが最優先の場合のみYES。"
+  }
+];
+
+const tours=[
+  {
+    name:"Summit Experience",
+    dsp:true,
+    base:5,
+    summary:"現役のMt John Observatoryで、広い星空と本格的な天体観測を楽しみながら、ガイドと一緒に宇宙を深く知りたい方におすすめです。",
+    v:{wonder:4,location:3,small:1,telescope:3,guide:3,japanese:3,english:3,wheelchair:0,ownphoto:2,portrait:1,budget:1}
+  },
+  {
+    name:"Crater Experience",
+    dsp:true,
+    base:5,
+    summary:"街から近いクレーター形状の天文台で、本格的なガイディングと望遠鏡観測をよりアクセスしやすく楽しみたい方におすすめです。",
+    v:{wonder:4,location:2,small:2,telescope:3,guide:3,japanese:3,english:3,wheelchair:3,ownphoto:2,portrait:1,budget:2}
+  },
+  {
+    name:"Blue Star Tekapo",
+    dsp:false,
+    base:2,
+    summary:"少人数、日本語、そして星空と一緒の写真撮影を特に重視する方におすすめです。",
+    v:{wonder:2,location:2,small:3,telescope:2,guide:3,japanese:3,english:3,wheelchair:3,ownphoto:3,portrait:3,budget:2}
+  },
+  {
+    name:"Go Tekapo",
+    dsp:false,
+    base:0,
+    summary:"星空写真を含むバランスの取れた体験を探している方の候補です。",
+    v:{wonder:2,location:2,small:2,telescope:2,guide:2,japanese:2,english:2,wheelchair:1,ownphoto:2,portrait:3,budget:2}
+  },
+  {
+    name:"Chameleon Stargazing",
+    dsp:false,
+    base:0,
+    summary:"星空と一緒の写真撮影を重視し、カジュアルな星空体験を楽しみたい方の候補です。",
+    v:{wonder:1,location:2,small:2,telescope:2,guide:2,japanese:0,english:3,wheelchair:1,ownphoto:2,portrait:3,budget:2}
+  }
+];
+
+let index=0,answers={};
+const $=id=>document.getElementById(id);
+
+function render(){
+  const x=questions[index];
+  $("q").textContent=x.q;
+  $("hint").textContent=x.hint;
+  $("step").textContent=`Question ${index+1}`;
+  $("count").textContent=`${index+1} / ${questions.length}`;
+  $("bar").style.width=`${(index+1)/questions.length*100}%`;
+}
+
+function answer(value){
+  answers[questions[index].key]=value;
+  index++;
+  if(index>=questions.length) finish();
+  else render();
+}
+
+function score(tour){
+  let s=tour.base;
+
+  questions.forEach(q=>{
+    const val=tour.v[q.key];
+    if(answers[q.key]) s+=val*2;
+    else if(q.key==="portrait" && val<2) s+=2;
+  });
+
+  // DSPの核となる「宇宙を知ってワクワクするガイディング」を強く評価
+  if(answers.wonder){
+    if(tour.name==="Summit Experience" || tour.name==="Crater Experience") s+=8;
+  }
+
+  // 写真を撮ってもらうことが最優先で、
+  // ガイド・望遠鏡・宇宙体験を重視しない場合のみフォト系を強く加点
+  if(answers.portrait && !answers.telescope && !answers.guide && !answers.wonder){
+    if(tour.name==="Blue Star Tekapo") s+=10;
+    if(tour.name==="Go Tekapo" || tour.name==="Chameleon Stargazing") s+=6;
+  }
+
+  if(answers.budget && tour.dsp) s-=9;
+  if(answers.english && answers.portrait && answers.small && tour.name==="Chameleon Stargazing") s+=10;
+  if(!answers.english && tour.name==="Chameleon Stargazing") s-=10;
+
+  // Summitは車椅子不可
+  if(answers.wheelchair && tour.name==="Summit Experience") s=-999;
+
+  return s;
+}
+
+function finish(){
+  const ranked=tours.map(t=>({...t,score:score(t)})).sort((a,b)=>b.score-a.score);
+  const winner=ranked[0];
+
+  $("questionArea").style.display="none";
+  $("result").style.display="block";
+  $("step").textContent="Complete";
+  $("count").textContent="";
+  $("bar").style.width="100%";
+
+  $("winnerName").textContent=winner.name;
+  $("summary").textContent=winner.summary;
+
+  let reasons=[];
+
+  if(winner.dsp){
+    if(answers.wonder) reasons.push("宇宙を知ってワクワクするガイディング体験を重視");
+    reasons.push(
+      "経験豊富なガイドによる星空と宇宙の案内",
+      "専門的な望遠鏡を使用した観測",
+      "天文台での星空観測",
+      "ご自身でも写真撮影可能"
+    );
+
+    if(winner.name==="Summit Experience"){
+      reasons.unshift("現役のMt John Observatoryの敷地内で観測");
+    }else{
+      reasons.unshift("風や街明かりの影響を抑えやすいクレーター形状の観測環境");
+    }
+  }else{
+    if(answers.portrait) reasons.push("星空と一緒の記念写真を重視");
+    if(answers.small) reasons.push("少人数の体験を重視");
+    if(answers.japanese && winner.v.japanese>=2) reasons.push("日本語での参加を重視");
+    if(answers.ownphoto) reasons.push("自分でも星空を撮影したい");
+  }
+
+  $("reasons").innerHTML=[...new Set(reasons)].slice(0,6).map(x=>`<li>${x}</li>`).join("");
+  $("dspCommon").style.display=winner.dsp?"block":"none";
+
+  let notes=[];
+
+  if(answers.wheelchair){
+    if(winner.name==="Crater Experience") notes.push("車椅子での参加は事前相談が必要です。");
+    if(winner.name==="Go Tekapo"||winner.name==="Chameleon Stargazing") notes.push("車椅子での参加可否・条件は事前確認をおすすめします。");
+  }
+
+  if(winner.name==="Summit Experience"){
+    notes.push("山頂は風・寒さなど気象の影響を受けやすく、山道をバスで片道約15分移動し、駐車場から山頂まで数百メートルの歩行があります。");
+  }
+
+  if(winner.name==="Crater Experience"){
+    notes.push("現役の観測施設ではありませんが、街から近く移動が少ないため、よりコンパクトに星空観測を楽しめます。");
+  }
+
+  $("warning").style.display=notes.length?"block":"none";
+  $("warning").innerHTML=notes.length
+    ? "<strong>事前に知っておきたいこと</strong><br>"+notes.join("<br>")
+    : "";
+
+  $("alts").innerHTML="<h3>ほかの候補</h3>"+ranked.slice(1,3).map((t,n)=>`
+    <div class="alt">
+      <strong>${n===0?"🥈":"🥉"} ${t.name}</strong>
+      <span>${t.dsp?"Dark Sky Project":"Alternative"}</span>
+    </div>
+  `).join("");
+}
+
+$("yes").onclick=()=>answer(true);
+$("no").onclick=()=>answer(false);
+
+$("restart").onclick=()=>{
+  index=0;
+  answers={};
+  $("result").style.display="none";
+  $("questionArea").style.display="block";
+  render();
+};
+
+render();
+</script>
+</body>
+</html>
